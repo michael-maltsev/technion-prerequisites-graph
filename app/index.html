@@ -18,9 +18,36 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <p>DAG: <span id="dag-name"></span></p>
+        <p>
+			<form>
+				פקולטה:
+				<select name="faculty">
+					<option value="הנדסה אזרחית וסביבתית">הנדסה אזרחית וסביבתית</option>
+					<option value="הנדסת מכונות">הנדסת מכונות</option>
+					<option value="הנדסת חשמל">הנדסת חשמל</option>
+					<option value="הנדסה כימית">הנדסה כימית</option>
+					<option value="הנדסת ביוטכנולוגיה ומזון">הנדסת ביוטכנולוגיה ומזון</option>
+					<option value="הנדסת אוירונוטיקה וחלל">הנדסת אוירונוטיקה וחלל</option>
+					<option value="הנדסת תעשייה וניהול">הנדסת תעשייה וניהול</option>
+					<option value="מתמטיקה">מתמטיקה</option>
+					<option value="פיזיקה">פיזיקה</option>
+					<option value="כימיה">כימיה</option>
+					<option value="ביולוגיה">ביולוגיה</option>
+					<option value="מתמטיקה שימושית">מתמטיקה שימושית</option>
+					<option value="ארכיטקטורה ובינוי ערים">ארכיטקטורה ובינוי ערים</option>
+					<option value="חינוך למדע וטכנולוגיה">חינוך למדע וטכנולוגיה</option>
+					<option value="מדעי המחשב">מדעי המחשב</option>
+					<option value="רפואה">רפואה</option>
+					<option value="מדע והנדסה של חומרים">מדע והנדסה של חומרים</option>
+					<option value="לימודים הומניסטיים ואמנויות">לימודים הומניסטיים ואמנויות</option>
+					<option value="הנדסה ביו-רפואית">הנדסה ביו-רפואית</option>
+					<option value="ספורט">ספורט</option>
+				</select>
+				<input type="submit" value="הצג">
+			</form>
+		</p>
         <div id="dag">
-            <svg height="80">
+            <svg width="100%">
                 <g transform="translate(20, 20)"/>
             </svg>
         </div>
@@ -30,6 +57,25 @@
         <script src="scripts/vendor/d3.v3.js"></script>
         <script src="scripts/vendor/dagre-d3.js"></script>
         <!-- endbuild -->
+
+		<script>
+			// https://stackoverflow.com/a/901144
+			function getParameterByName(name, url) {
+				if (!url) url = window.location.href;
+				name = name.replace(/[\[\]]/g, "\\$&");
+				var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+					results = regex.exec(url);
+				if (!results) return null;
+				if (!results[2]) return '';
+				return decodeURIComponent(results[2].replace(/\+/g, " "));
+			}
+
+			// load script with graph data
+			var fileName = getParameterByName('source') || 'courses_201801.js';
+			var dataScript = document.createElement('script');
+			dataScript.src = fileName;
+			document.write(dataScript.outerHTML);
+		</script>
 
         <!-- build:js scripts/main.js -->
         <script src="scripts/main.js"></script>

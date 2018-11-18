@@ -3,8 +3,7 @@
 (function () {
     'use strict';
     window.DAG = {
-        displayGraph: function (graph, dagNameElem, svgElem) {
-            dagNameElem.text(graph.name);
+        displayGraph: function (graph, svgElem) {
             this.renderGraph(graph, svgElem);
         },
 
@@ -38,20 +37,72 @@
 (function () {
     'use strict';
 
+	// https://stackoverflow.com/a/901144
+	function getParameterByName(name, url) {
+		if (!url) url = window.location.href;
+		name = name.replace(/[\[\]]/g, "\\$&");
+		var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+			results = regex.exec(url);
+		if (!results) return null;
+		if (!results[2]) return '';
+		return decodeURIComponent(results[2].replace(/\+/g, " "));
+	}
+
+	var faculty = getParameterByName('faculty') || 'מדעי המחשב';
+	jQuery('select[name="faculty"]').val(faculty);
+
     // load data on dom ready
     jQuery(function () {
-        // load script with graph data
-        var fileName = window.location.search ? window.location.search.slice(1) : 'graph1.js';
-        var dataScript = document.createElement('script');
-        dataScript.src = fileName;
-        document.body.appendChild(dataScript);
+		var nodes = [];
+		var links = [];
+		var allCourses = {};
+		courses_from_rishum.forEach(function (item) {
+			var general = item['general'];
+			if (general['פקולטה'] !== faculty) {
+				return;
+			}
+
+			var label = general['מספר מקצוע'] + ' - ' + general['שם מקצוע'];
+			var node = { id: general['מספר מקצוע'], value: { label: label } };
+			nodes.push(node);
+
+			allCourses[general['מספר מקצוע']] = true;
+		});
+
+		courses_from_rishum.forEach(function (item) {
+			var general = item['general'];
+			if (general['פקולטה'] !== faculty) {
+				return;
+			}
+
+			var types = [
+				'מקצועות קדם',
+				//'מקצועות ללא זיכוי נוסף',
+				'מקצועות צמודים',
+				//'מקצועות ללא זיכוי נוסף (מוכלים)',
+				//'מקצועות ללא זיכוי נוסף (מכילים)',
+				//'מקצועות זהים'
+			];
+			types.forEach(function (type) {
+				if (!general[type]) {
+					return;
+				}
+				var courses = general[type].match(/\d+/g).filter(function(item, pos, self) {
+					return self.indexOf(item) == pos;
+				});
+				courses.forEach(function (course) {
+					if (!allCourses[course]) {
+						return;
+					}
+					var label = (type == 'מקצועות צמודים') ? 'צמוד' : '';
+					var link = { u: course, v: general['מספר מקצוע'], value: { label: label } };
+					links.push(link);
+				})
+			});
+		});
+
+		var data = {nodes: nodes, links: links};
+
+        DAG.displayGraph(data, jQuery('#dag > svg'));
     });
-
-    // callback for graph data loading
-    window.loadData = function (data) {
-        DAG.displayGraph(data, jQuery('#dag-name'), jQuery('#dag > svg'));
-    };
 }());
-
-
-
