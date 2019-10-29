@@ -58,7 +58,7 @@
 		var allCourses = {};
 		courses_from_rishum.forEach(function (item) {
 			var general = item['general'];
-			if (general['פקולטה'] !== faculty) {
+			if (faculty != '-' && general['פקולטה'] !== faculty) {
 				return;
 			}
 
@@ -71,7 +71,7 @@
 
 		courses_from_rishum.forEach(function (item) {
 			var general = item['general'];
-			if (general['פקולטה'] !== faculty) {
+			if (faculty != '-' && general['פקולטה'] !== faculty) {
 				return;
 			}
 
