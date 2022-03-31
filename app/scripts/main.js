@@ -48,34 +48,52 @@
 		return decodeURIComponent(results[2].replace(/\+/g, " "));
 	}
 
-	var faculty = getParameterByName('faculty') || 'מדעי המחשב';
-	jQuery('select[name="faculty"]').val(faculty);
-
     // load data on dom ready
     jQuery(function () {
-		var nodes = [];
-		var links = [];
-		var allCourses = {};
-		courses_from_rishum.forEach(function (item) {
-			var general = item['general'];
-			if (faculty != '-' && general['פקולטה'] !== faculty) {
-				return;
+		const currentSemester = getParameterByName('semester') || '';
+		const currentFaculty = getParameterByName('faculty') || 'מדעי המחשב';
+
+		const nodes = [];
+		const links = [];
+		const allFaculties = {};
+		const facultyCourses = {};
+		for (const item of courses_from_rishum) {
+			const general = item['general'];
+
+			if (general['פקולטה']) {
+				allFaculties[general['פקולטה']] = true;
 			}
 
-			var label = general['מספר מקצוע'] + ' - ' + general['שם מקצוע'];
-			var node = { id: general['מספר מקצוע'], value: { label: label } };
+			if (currentFaculty !== '-' && general['פקולטה'] !== currentFaculty) {
+				continue;
+			}
+
+			const label = general['מספר מקצוע'] + ' - ' + general['שם מקצוע'];
+			const node = { id: general['מספר מקצוע'], value: { label: label } };
 			nodes.push(node);
 
-			allCourses[general['מספר מקצוע']] = true;
-		});
+			facultyCourses[general['מספר מקצוע']] = true;
+		}
 
-		courses_from_rishum.forEach(function (item) {
-			var general = item['general'];
-			if (faculty != '-' && general['פקולטה'] !== faculty) {
-				return;
+		jQuery('input[name="semester"]').val(currentSemester);
+
+		const facultySelect = jQuery('select[name="faculty"]');
+		for (const faculty of Object.keys(allFaculties)) {
+			facultySelect.append($('<option>', {
+				value: faculty,
+				text: faculty
+			}));
+		}
+
+		facultySelect.val(currentFaculty);
+
+		for (const item of courses_from_rishum) {
+			const general = item['general'];
+			if (currentFaculty != '-' && general['פקולטה'] !== currentFaculty) {
+				continue;
 			}
 
-			var types = [
+			const types = [
 				'מקצועות קדם',
 				//'מקצועות ללא זיכוי נוסף',
 				'מקצועות צמודים',
@@ -83,25 +101,25 @@
 				//'מקצועות ללא זיכוי נוסף (מכילים)',
 				//'מקצועות זהים'
 			];
-			types.forEach(function (type) {
+			for (const type of types) {
 				if (!general[type]) {
-					return;
+					continue;
 				}
-				var courses = general[type].match(/\d+/g).filter(function(item, pos, self) {
+				const courses = general[type].match(/\d+/g).filter((item, pos, self) => {
 					return self.indexOf(item) == pos;
 				});
-				courses.forEach(function (course) {
-					if (!allCourses[course]) {
-						return;
+				for (const course of courses) {
+					if (!facultyCourses[course]) {
+						continue;
 					}
-					var label = (type == 'מקצועות צמודים') ? 'צמוד' : '';
-					var link = { u: course, v: general['מספר מקצוע'], value: { label: label } };
+					const label = (type == 'מקצועות צמודים') ? 'צמוד' : '';
+					const link = { u: course, v: general['מספר מקצוע'], value: { label: label } };
 					links.push(link);
-				})
-			});
-		});
+				}
+			}
+		}
 
-		var data = {nodes: nodes, links: links};
+		const data = {nodes: nodes, links: links};
 
         DAG.displayGraph(data, jQuery('#dag > svg'));
     });
