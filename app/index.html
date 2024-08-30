@@ -53,8 +53,8 @@
 			}
 
 			// load script with graph data
-			var semester = (getParameterByName('semester') || '').replace(/\D/g, '') || '202102';
-			var fileName = 'https://cheesefork.cf/courses/courses_' + semester + '.min.js';
+			var semester = (getParameterByName('semester') || '').replace(/[^0-9_]/g, '') || '2024_200';
+			var fileName = 'https://sap.cheesefork.cf/courses_' + semester + '.min.js';
 			var dataScript = document.createElement('script');
 			dataScript.src = fileName;
 			document.write(dataScript.outerHTML);
